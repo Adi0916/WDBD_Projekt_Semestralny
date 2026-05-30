@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bduomkjhum6dg"]
+
+[node name="PathPoint" type="Node3D"]
+
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Node3D"]
+light_color = Color(1, 0, 0, 1)
+light_energy = 0.01
+light_indirect_energy = 0.5
+omni_range = 0.1
+omni_attenuation = 0.7
