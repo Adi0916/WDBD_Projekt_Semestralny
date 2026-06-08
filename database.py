@@ -16,15 +16,15 @@ def create_tables():
                            country_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             country_name TEXT NOT NULL UNIQUE);
         create table if not exists airport (
-                           icao code primary key,
+                           icao_code text primary key,
                            city text,
                            country_id integer references country(country_id));
         create table if not exists aircraft (
                            icao24 text primary key,
                            callsign text,
-                           origin_country text,
+                           country_id integer references country(country_id),
                            aircraft_category integer,
-                           last_update text);
+                           last_updated text);
 
         CREATE TABLE IF NOT EXISTS flight_data (
                 flight_id INTEGER PRIMARY KEY AUTOINCREMENT,
