@@ -21,10 +21,10 @@ func _input(event: InputEvent) -> void:
 			raycast.to = to
 			var ray_res := get_world_3d().direct_space_state.intersect_ray(raycast)
 			if not ray_res.is_empty():
-				if ray_res["collider"] is FlightData:
-					var data: Data = ray_res["collider"].retrive_data()
-					planet_pos.x = data.latitude - 13 # Poprawka przez perspektywe
-					planet_pos.y = -data.langnitude + 2.0 # Poprawka przez perspektywe
+				if ray_res["collider"] is PlaneVis:
+					var data: PlaneStateData = ray_res["collider"].return_data()
+					planet_pos.x = data.flight_data.latitude - 13 # Poprawka przez perspektywe
+					planet_pos.y = -data.flight_data.longnitude + 2.0 # Poprawka przez perspektywe
 
 	if event is InputEventMouseMotion and camera_movement:
 		var velocity: Vector2 = event.velocity

@@ -1,6 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://1pqc1ct33yo3"]
-
-[ext_resource type="Texture2D" uid="uid://dva7htyuca7km" path="res://assets/kenney_ui-pack/Sample.png" id="1_ajebt"]
+[gd_scene format=3 uid="uid://1pqc1ct33yo3"]
 
 [node name="PlaneInfoDisplay" type="Control"]
 layout_mode = 3
@@ -9,7 +7,3 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Sample" type="Sprite2D" parent="."]
-position = Vector2(369, 57)
-texture = ExtResource("1_ajebt")

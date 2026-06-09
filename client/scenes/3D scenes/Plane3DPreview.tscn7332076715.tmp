@@ -36,12 +36,8 @@ billboard_mode = 1
 material = SubResource("StandardMaterial3D_n5k8l")
 size = Vector2(1000, 1000)
 
-[node name="Plane3dPreview" type="Node3D" node_paths=PackedStringArray("plane_node", "path_node", "airport_node", "data_loader")]
+[node name="Plane3dPreview" type="Node3D"]
 script = ExtResource("1_7l5x3")
-plane_node = NodePath("MeshInstance3D/Planes")
-path_node = NodePath("MeshInstance3D/Routes")
-airport_node = NodePath("MeshInstance3D/Airports")
-data_loader = NodePath("Node")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_0gk1m")
