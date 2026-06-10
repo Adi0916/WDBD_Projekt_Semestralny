@@ -12,18 +12,26 @@ def create_tables():
 
     with connect_db() as conn:
         conn.executescript('''
+        CREATE TABLE IF NOT EXISTS continent (
+                           continent_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                           continent_name TEXT NOT NULL UNIQUE
+        );
         CREATE TABLE IF NOT EXISTS country (
                            country_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            country_name TEXT NOT NULL UNIQUE);
-        create table if not exists airport (
+                            country_name TEXT NOT NULL UNIQUE,
+                            continent_id INTEGER REFERENCES continent(continent_id));
+        
+        CREATE TABLE IF NOT EXISTS airport (
                            icao_code text primary key,
-                           city text,
-                           country_id integer references country(country_id));
-        create table if not exists aircraft (
+                           airport_name text,
+                           country_id integer references country(country_id),
+                           latitude real,
+                           longitude real,
+                           type text);
+        CREATE TABLE IF NOT EXISTS aircraft (
                            icao24 text primary key,
                            callsign text,
                            country_id integer references country(country_id),
-                           aircraft_category integer,
                            last_updated text);
 
         CREATE TABLE IF NOT EXISTS flight_data (
