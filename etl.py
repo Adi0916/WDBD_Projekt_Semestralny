@@ -2,6 +2,8 @@ import logging
 from api_client import fetch_states, fetch_all_flights
 from datetime import datetime, timezone
 from database import connect_db
+from airports import airport_data
+import pycountry
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -15,36 +17,77 @@ def log_import_run(conn, received, saved, status, error_msg=None):
     )
     conn.commit()
 
-def get_airport_info(icao):
+def get_full_continent_name(continent_code):
 
-    if not icao:
-        return 'Unknown', 'Unknown'
-    
-    cities = {
-        "EPWA": "Warsaw", "EPKK": "Krakow", "EPGD": "Gdansk", "EPMO": "Modlin",
-        "EDDF": "Frankfurt", "EDDB": "Berlin", "EHAM": "Amsterdam", "EGLL": "London",
-        "LFPG": "Paris", "LKPR": "Prague", "LOWW": "Vienna", "KJFK": "New York"
+    code_map = {
+        "AF": "Africa",
+        "AN": "Antarctica",
+        "AS": "Asia",
+        "EU": "Europe",
+        "NA": "North America",
+        "OC": "Oceania",
+        "SA": "South America"
     }
+    return code_map.get(continent_code, continent_code)
+
+
+def get_airport_info(conn, icao_code):
+
+    if not icao_code or icao_code.strip() == "":
+        return
     
-    prefixes = {
-        "EP": "Poland", "ED": "Germany", "ET": "Germany", "LK": "Czech Republic",
-        "LZ": "Slovakia", "LH": "Hungary", "LO": "Austria", "LS": "Switzerland",
-        "LF": "France", "EB": "Belgium", "EH": "Netherlands", "EG": "United Kingdom",
-        "EI": "Ireland", "ES": "Sweden", "EN": "Norway", "EK": "Denmark",
-        "EF": "Finland", "UM": "Lithuania", "UK": "Ukraine", "LI": "Italy",
-        "LE": "Spain", "LP": "Portugal", "LG": "Greece", "K": "United States"
-    }
+    continent_code = "Unknown"
+    country_code = "Unknown"
+    airport_name = "Unknown"
+    lat = None
+    lon = None
+    apt_type = "Unknown"
 
-    city = cities.get(icao, "Unknown")
-    country = "Unknown"
+    try:
+        apt_list = airport_data.get_airport_by_icao(icao_code)
 
-    if icao[:2] in prefixes:
-        country = prefixes[icao[:2]]
-    elif icao[0] in prefixes:
-        country = prefixes[icao[0]]
+        if apt_list:
+            apt_info = apt_list[0]
+            continent_code = apt_info.get("continent", "Unknown")
+            country_code = apt_info.get("country_code", "Unknown")
+            airport_name = apt_info.get("airport", "Unknown")
+            lat = apt_info.get("latitude", None)
+            lon = apt_info.get("longitude", None)
+            apt_type = apt_info.get("type", "Unknown")
+
+    except Exception as e:
+        logging.warning(f"Failed to get airport info for {icao_code}: {e}")
+
+    country_name = "Unknown"
+    if country_code and country_code != "Unknown":
+        country_obj = pycountry.countries.get(alpha_2=country_code)
+        if country_obj:
+            country_name = country_obj.name
+
+    continent_name = get_full_continent_name(continent_code)
+
+    conn.execute(''' insert into continent (continent_name) values (?)
+                    on conflict(continent_name) do nothing''', (continent_name,))
     
-    return city, country
+    res = conn.execute('SELECT continent_id FROM continent WHERE continent_name = ?', (continent_name,))
+    continent_id = res.fetchone()[0]
 
+    conn.execute (''' insert into country (country_name, continent_id) values (?, ?)
+                    on conflict(country_name) do update set
+                    continent_id = excluded.continent_id where continent_id is NULL''', (country_name, continent_id))
+    res = conn.execute('SELECT country_id FROM country WHERE country_name = ?', (country_name,))
+    country_id = res.fetchone()[0]
+
+    conn.execute(''' insert into airport (icao_code, airport_name, country_id, latitude, longitude, type)
+                    values (?, ?, ?, ?, ?, ?)
+                    on conflict(icao_code) do update set
+                    airport_name = CASE WHEN airport_name = 'Unknown' THEN excluded.airport_name ELSE airport_name END,
+                    country_id = excluded.country_id,
+                    latitude = excluded.latitude,
+                    longitude = excluded.longitude,
+                    type = excluded.type
+                    ''', (icao_code, airport_name, country_id, lat, lon, apt_type))
+        
 
 def run_radar_etl():
     logging.info("Starting RADAR ETL")
@@ -74,7 +117,6 @@ def run_radar_etl():
                     velocity = state[9] if len(state) > 9 else None
                     true_track = state[10] if len(state) > 10 else None
                     geo_altitude = state[13] if len(state) > 13 else None
-                    category = state[17] if len(state) > 17 else 0
 
                     
                     conn.execute('''
@@ -86,14 +128,13 @@ def run_radar_etl():
                     country_id = c_res.fetchone()[0]
                     
                     conn.execute('''
-                            INSERT INTO aircraft (icao24, callsign, country_id, aircraft_category, last_updated)
-                    VALUES (?, ?, ?, ?, ?)
+                            INSERT INTO aircraft (icao24, callsign, country_id, last_updated)
+                    VALUES (?, ?, ?, ?)
                     ON CONFLICT(icao24) DO UPDATE SET
                         callsign = excluded.callsign,
                         country_id = excluded.country_id,
-                        aircraft_category = excluded.aircraft_category,
                         last_updated = excluded.last_updated;
-                    ''', (icao24, callsign, country_id, category, datetime.now(timezone.utc).isoformat()))
+                    ''', (icao24, callsign, country_id, datetime.now(timezone.utc).isoformat()))
             
                     if time_position:
                         dt_pos = datetime.fromtimestamp(time_position, tz=timezone.utc).isoformat()
@@ -108,7 +149,7 @@ def run_radar_etl():
                 except Exception as row_error:
                     logging.warning(f"Skipped {state[0] if len(state)>0 else 'UNKNOWN'}: {row_error}")
                     continue
-            log_import_run(conn, recieved, saved, "SUCCESS")
+            log_import_run(conn, recieved, saved, "SUCCESS - RADAR")
             logging.info(f"ETL completed: {recieved} records received, {saved} records saved.")
         
         except Exception as e:
@@ -120,7 +161,7 @@ def run_flight_etl():
     with connect_db() as conn:
         try:
             end_ts = int(datetime.now(timezone.utc).timestamp()) - (24*3600)
-            begin_ts = end_ts - 24 * 3600
+            begin_ts = end_ts - 12 * 3600
             flights = fetch_all_flights(begin_ts, end_ts)
             if not flights:
                 logging.warning("No flight found in given time range.")
@@ -137,23 +178,17 @@ def run_flight_etl():
                 departure_date_time = datetime.fromtimestamp(flight.get("firstSeen"), tz=timezone.utc).isoformat() if flight.get("firstSeen") else None
                 arrival_date_time = datetime.fromtimestamp(flight.get("lastSeen"), tz=timezone.utc).isoformat() if flight.get("lastSeen") else None
 
+                if not departure_airport_id or departure_airport_id.strip() == "":
+                    departure_airport_id = None
+                if not arrival_airport_id or arrival_airport_id.strip() == "":
+                    arrival_airport_id = None
+                
                 conn.execute(''' insert into aircraft (icao24) values (?) on conflict(icao24) do nothing''', (icao24,))
                 
-                for airport_id in [departure_airport_id, arrival_airport_id]:
-                    if airport_id:
-                        city, country = get_airport_info(airport_id)
-
-                        conn.execute(''' insert into country (country_name) values (?) on conflict(country_name) do nothing''', (country,))
-                        c_res = conn.execute('SELECT country_id FROM country WHERE country_name = ?', (country,))
-                        row = c_res.fetchone()
-                        a_country_id = row[0] if row else None
-
-                        conn.execute(''' insert into airport (icao_code, city, country_id)
-                        values (?, ?, ?)
-                                     on conflict (icao_code) do update 
-                                     set city = case when city = 'Unknown' then excluded.city else city end,
-                                      country_id = excluded.country_id
-                        ''', (airport_id, city, a_country_id))
+                if departure_airport_id:
+                    get_airport_info(conn, departure_airport_id)
+                if arrival_airport_id:
+                    get_airport_info(conn, arrival_airport_id)
                
                 cur = conn.execute('''
                                     select 1 from flight_data 
