@@ -5,7 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "airports-py>=3.1.0",
     "logging>=0.4.9.6",
+    "pycountry>=26.2.16",
     "requests>=2.34.2",
     "schedule>=1.2.2",
     "sqlalchemy>=2.0.49",

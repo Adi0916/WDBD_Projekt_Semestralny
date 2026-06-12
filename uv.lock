@@ -3,6 +3,15 @@ revision = 3
 requires-python = ">=3.13"
 
 [[package]]
+name = "airports-py"
+version = "3.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/24/2441356c09ea299c6422162395689f05d3b7d48d49d443c5a8f78696f005/airports_py-3.1.0.tar.gz", hash = "sha256:5022e093c2c61e8bb22c9375954dbb1ddbb58ddc69dacb2b2a2241e1f1a9feab", size = 1083458, upload-time = "2026-03-11T04:13:04.968Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/33/73d1bb162fa1ea5066bccd468633d780ae76841cf78d414bfdee989cb562/airports_py-3.1.0-py3-none-any.whl", hash = "sha256:608db36e32b8c47eee52921d237c74b8034120c95e84740c5d4356012c52a012", size = 1074595, upload-time = "2026-03-11T04:13:02.403Z" },
+]
+
+[[package]]
 name = "certifi"
 version = "2026.5.20"
 source = { registry = "https://pypi.org/simple" }
@@ -119,7 +128,9 @@ name = "projekt"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "airports-py" },
     { name = "logging" },
+    { name = "pycountry" },
     { name = "requests" },
     { name = "schedule" },
     { name = "sqlalchemy" },
@@ -127,10 +138,21 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "airports-py", specifier = ">=3.1.0" },
     { name = "logging", specifier = ">=0.4.9.6" },
+    { name = "pycountry", specifier = ">=26.2.16" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "schedule", specifier = ">=1.2.2" },
     { name = "sqlalchemy", specifier = ">=2.0.49" },
+]
+
+[[package]]
+name = "pycountry"
+version = "26.2.16"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/de/1d/061b9e7a48b85cfd69f33c33d2ef784a531c359399ad764243399673c8f5/pycountry-26.2.16.tar.gz", hash = "sha256:5b6027d453fcd6060112b951dd010f01f168b51b4bf8a1f1fc8c95c8d94a0801", size = 7711342, upload-time = "2026-02-17T03:42:52.367Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9c/42/7703bd45b62fecd44cd7d3495423097e2f7d28bc2e99e7c1af68892ab157/pycountry-26.2.16-py3-none-any.whl", hash = "sha256:115c4baf7cceaa30f59a4694d79483c9167dbce7a9de4d3d571c5f3ea77c305a", size = 8044600, upload-time = "2026-02-17T03:42:49.777Z" },
 ]
 
 [[package]]
