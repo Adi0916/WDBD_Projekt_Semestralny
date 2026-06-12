@@ -9,6 +9,17 @@ signal airports_loaded(data: Array[AirportData])
 @export var mock_data: String
 var plane_data: PlaneData = PlaneData.new()
 
+var database: SQLite
+func _ready() -> void:
+	database = SQLite.new()
+	database.path = "res://opensky_data.db"
+	database.open_db()
+
+func _exit_tree() -> void:
+	database.close_db()
+
+
+
 func load_path() -> void:
 	print("Loading path...")
 	var data: Array[FlightData]
@@ -30,3 +41,6 @@ func load_plane(node: Node3D) -> void:
 	print("Loading plane...")
 	plane_loaded.emit(plane_data, node)
 	print("Plane loading Successful!")
+
+func load_airports() -> void:
+	pass
