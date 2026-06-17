@@ -1,77 +1,41 @@
-# OpenSky Network SQL
-## Opis projektu
-System służy do automatycznego gromadzenia i analizy danych o ruchu lotniczym w czasie rzeczywistym przy użyciu **OpenSky Network API**. Projekt realizuje pełny proces ETL (Extract, Transform, Load) – od pobrania danych przez API, przez ich walidację i archiwizację w relacyjnej bazie danych, aż po wizualizację na dashboardzie.
+# OpenSky Network SQL – Semester Project
 
-## Stos technologiczny
-* **Baza danych:** PostgreSQL (Relacyjna struktura danych)
-* **Język programowania:** Python 3.13.5 (Import danych, obsługa API)
-* **API:** [OpenSky Network REST API](https://opensky-network.org/apidoc/rest.html)
-* **Wizualizacja:** (do rozstrzygnięcia)
-* **Biblioteki Python:** (do rozstrzygnięcia)
-  
-### Encje i tabele: (przykład)
-* **Tabele merytoryczne (4):**
-    * `flights` – dane o aktualnych lotach (pozycja, wysokość, prędkość).
-    * `aircrafts` – szczegółowe informacje o statkach powietrznych (icao24, callsign).
-    * `trajectories` – historia zmian pozycji dla poszczególnych lotów.
-    * `flight_stats` – zagregowane metryki dotyczące lotów.
-* **Tabela słownikowa (1):**
-    * `countries` – słownik krajów pochodzenia statków powietrznych.
-* **Tabela techniczna (1):**
-    * `import_log` – logowanie każdego cyklu pobierania danych (timestamp, status, liczba rekordów, czas trwania).
+## Project Description
+This system is designed for the automatic collection and analysis of real-time air traffic data using the [OpenSky Network API](https://opensky-network.org/apidoc/rest.html). The project implements a complete ETL (Extract, Transform, Load) process – from data extraction through API, data validation and archiving in a relational database, to analytical processing.
 
-## Funkcje systemu (przykład)
-- [x] **Cykliczny import:** Automatyczne odpytywanie API w interwale czasowym (np. co 5 minut).
-- [x] **Historyczność:** System nie nadpisuje danych, lecz buduje historię lotów.
-- [x] **Brak duplikacji:** Mechanizmy sprawdzające unikalność rekordów przed zapisem do bazy.
-- [x] **Analiza SQL:** Zestaw 5 zaawansowanych zapytań (np. top 5 najaktywniejszych krajów, średnia wysokość przelotowa w danym regionie).
-
-## Wizualizacja i Filtrowanie (przykład)
-Projekt zawiera warstwę wizualizacyjną z **3 różnymi wykresami** oraz rozbudowanym systemem filtracji (**10 filtrów**), takimi jak:
-1.  Kraj pochodzenia
-2.  Zakres wysokości (Altitude)
-3.  Prędkość (Velocity)
-4.  Przynależność do strefy (Longitude/Latitude)
-5.  ...i inne.
-
-## Struktura plików (przykład)
+## Project Structure
 ```text
-├── sql/
-│   ├── schema.sql           # Definicja tabel, kluczy i więzów integralności
-│   └── analysis.sql         # 5 wymaganych zapytań raportowych
-├── src/
-│   ├── main.py              # Główny skrypt uruchamiający import
-│   ├── database.py          # Logika połączenia i zapisu do DB
-│   └── api_client.py        # Obsługa zapytań do OpenSky Network
-├── docs/
-│   └── erd_diagram.png      # Wizualny model bazy danych
-├── .env.example             # Przykład pliku konfiguracyjnego (API keys, DB pass)
-└── README.md
+├── api_client.py        # Communication with OpenSky API
+├── database.py          # Database connection and schema (SQLite)
+├── etl.py               # ETL (Extract-Transform-Load) logic
+├── main.py              # Main entry point
+├── queries.py           # SQL analytical queries
+├── scheduler.py         # Automation of periodic data import
+├── opensky_ERD.pgerd    # Database ERD diagram
+├── pyproject.toml       # Project configuration (uv)
+├── uv.lock              # Dependency lockfile
+└── README.md            # Project documentation
 ```
 
-## Instalacja i Konfiguracja (przykład)
+## Installation and Usage
 
-Projekt wykorzystuje menedżer **uv**, który gwarantuje błyskawiczną instalację i identyczne środowisko u każdego członka zespołu.
+This project uses **`uv`** for dependency and environment management.
 
-### 1. Instalacja `uv`
-Jeśli nie masz jeszcze `uv`, zainstaluj go poniższym poleceniem:
+### 1. Prerequisites
 
-* **macOS / Linux:**
-    ```bash
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    ```
-* **Windows (PowerShell):**
-    ```powershell
-    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-    ```
+If you do not have `uv` installed:
 
-### 2. Pobranie i przygotowanie projektu
+* **Linux/macOS:** `curl -LsSf https://astral.sh/uv/install.sh | sh`
+* **Windows:** `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+
+### 2. Setting up the environment
+
+In the project folder, run:
+
 ```bash
-# Sklonuj repozytorium
-
-git clone https://github.com/Adi0916/OpenSky_Network_SQL
-cd WDBD_Projekt_Semestralny
-
-# Automatyczna instalacja Pythona i wszystkich zależności
+# Install dependencies
 uv sync
+
+# Run the periodic import scheduler
+uv run scheduler.py
 ```
