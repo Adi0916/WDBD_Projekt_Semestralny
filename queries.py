@@ -112,7 +112,12 @@ def get_aircraft_trajectory(icao24, time_from=None):
 
 #4: Udział procentowy kontynentów lub kategorii w globalnym ruchu
 
-def get_continent_distribution_stats():
+def get_continent_distribution_stats(exclude_list=None):
+    if exclude_list is None:
+        exclude_list = []
+
+    # Tworzymy placeholder dla każdego elementu w liście (np. ?, ?, ?)
+    placeholders = ', '.join(['?'] * len(exclude_list))
 
     query = '''
         SELECT
@@ -121,13 +126,30 @@ def get_continent_distribution_stats():
         FROM aircraft a
         LEFT JOIN country c ON a.country_id = c.country_id
         LEFT JOIN continent ct ON c.continent_id = ct.continent_id
-        GROUP BY continent
-        ORDER BY aircraft_count DESC
+    '''
+
+    # Jeśli są kontynenty do wykluczenia, dodajemy warunek WHERE
+    if exclude_list:
+        query += f" WHERE COALESCE(ct.continent_name, 'Unknown') NOT IN ({placeholders})"
+
+    query += " GROUP BY continent ORDER BY aircraft_count DESC"
+
+    with connect_db() as conn:
+        cursor = conn.execute(query, exclude_list)
+        return cursor.fetchall()
+
+# Pobranie nazw kontynentów do filtrowania
+
+def get_continent_names():
+    query = '''
+        SELECT
+            DISTINCT(continent_name)
+        FROM continent
+        ORDER BY continent_name
     '''
     with connect_db() as conn:
         cursor = conn.execute(query)
         return cursor.fetchall()
-
 
 
 #5: Raport techniczny
@@ -150,8 +172,4 @@ def get_system_health_report(status_filter=None):
     with connect_db() as conn:
         cursor = conn.execute(query, params)
         return cursor.fetchall()
-
-if __name__ == "__main__":
-    df = get_system_health_report()
-    print(df)
 

@@ -1,14 +1,15 @@
 import sys
 import pandas as pd
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QLineEdit, QPushButton, QLabel, QGridLayout, QScrollArea)
+                             QLineEdit, QPushButton, QLabel, QGridLayout, QScrollArea, QCheckBox)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 # Import Twoich funkcji (zakładam, że są w pliku data_queries.py)
-from queries import (get_live_radar_data, get_airport_traffic_stats,
-                          get_aircraft_trajectory, get_continent_distribution_stats,
-                          get_system_health_report)
+from queries import (get_airport_traffic_stats,
+                     get_continent_distribution_stats,
+                     get_system_health_report,
+                     get_continent_names)
 
 class ChartCanvas(FigureCanvas):
     def __init__(self, parent=None):
@@ -17,53 +18,54 @@ class ChartCanvas(FigureCanvas):
         super().__init__(fig)
 
 class VisualizationWindow(QMainWindow):
-    # Dodajemy argument 'defaults' (domyślnie pusty słownik)
-    def __init__(self, title, update_func, filter_map, defaults=None):
+    def __init__(self, title, update_func, filter_map, defaults=None, checkboxes=None):
         super().__init__()
         self.setWindowTitle(title)
         self.update_func = update_func
         self.filter_map = filter_map
         self.defaults = defaults or {}
+        self.checkboxes = {} # Przechowywanie stanów checkboxów
 
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         layout = QVBoxLayout(main_widget)
 
+        # Sekcja filtrów tekstowych
         self.inputs = {}
         grid = QGridLayout()
         for i, (label, param_key) in enumerate(filter_map.items()):
             grid.addWidget(QLabel(label), i // 2, (i % 2) * 2)
             input_box = QLineEdit()
-
-            # --- TUTAJ USTWIAMY DOMYŚLNĄ WARTOŚĆ ---
             if param_key in self.defaults:
                 input_box.setText(str(self.defaults[param_key]))
-
             grid.addWidget(input_box, i // 2, (i % 2) * 2 + 1)
             self.inputs[param_key] = input_box
         layout.addLayout(grid)
 
-        # Reszta klasy pozostaje bez zmian...
+        # Sekcja checkboxów (jeśli przekazano listę)
+        if checkboxes:
+            cb_layout = QGridLayout()
+            for i, cb_name in enumerate(checkboxes):
+                cb = QCheckBox(cb_name)
+                cb.setChecked(True)
+                cb_layout.addWidget(cb, i // 3, i % 3)
+                self.checkboxes[cb_name] = cb
+            layout.addLayout(cb_layout)
+
         self.canvas = ChartCanvas()
         layout.addWidget(self.canvas)
+        # Podpięcie resize_event dla lepszego skalowania
+        self.canvas.mpl_connect('resize_event', lambda event: self.canvas.draw())
 
         btn = QPushButton(f"Refresh {title}")
         btn.clicked.connect(self.run_update)
         layout.addWidget(btn)
+        self.run_update()
 
     def run_update(self):
         vals = {k: self.inputs[k].text() if self.inputs[k].text() else None for k in self.inputs}
+        vals['hidden_continents'] = [name for name, cb in self.checkboxes.items() if not cb.isChecked()]
         self.update_func(self.canvas, vals)
-
-# --- Logika dla każdego modułu ---
-
-def update_radar(canvas, f):
-    data = get_live_radar_data(f['country'], f['continent'], f['on_ground'], f['category'])
-    canvas.axes.cla()
-    if data:
-        df = pd.DataFrame(data, columns=['icao', 'call', 'cntry', 'cont', 'cat', 'lat', 'lon', 'alt', 'vel', 'og', 'time'])
-        canvas.axes.scatter(df['lon'], df['lat'], c='blue', alpha=0.5)
-    canvas.draw()
 
 def update_traffic(canvas, f):
     airport = f.get('airport') if f.get('airport') else None
@@ -103,45 +105,21 @@ def update_traffic(canvas, f):
     canvas.figure.tight_layout()
     canvas.draw()
 
-def update_trajectory(canvas, f):
-    data = get_aircraft_trajectory(f['icao24'], f['time_from'])
-    canvas.axes.cla()
-    if data:
-        df = pd.DataFrame(data, columns=['lat', 'lon', 'alt', 'vel', 'time'])
-        canvas.axes.plot(df['lon'], df['lat'])
-    canvas.draw()
-
 def update_distribution(canvas, f):
-    data = get_continent_distribution_stats()
+    # Pobieramy kontynenty do ukrycia
+    hidden = f.get('hidden_continents', [])
+    data = get_continent_distribution_stats(exclude_list=hidden)
     canvas.axes.cla()
 
     if data:
         df = pd.DataFrame(data, columns=['cont', 'count'])
-
         wedges, texts, autotexts = canvas.axes.pie(
-            df['count'],
-            labels=None,
-            autopct='%1.1f%%',
-            pctdistance=0.8,
-            startangle=140,
-            textprops={'fontsize': 10, 'weight': 'bold'}
+            df['count'], labels=df['cont'], autopct='%1.1f%%',
+            pctdistance=0.8, startangle=140
         )
-
-        canvas.axes.legend(
-            wedges, df['cont'],
-            title="Continents",
-            loc="center left",
-            bbox_to_anchor=(1, 0, 0.5, 1),
-            fontsize=9
-        )
-
-        #canvas.axes.set_title("Distribution by Continent", fontsize=14, fontweight='bold')
-
-        canvas.figure.subplots_adjust(left=0.05, right=0.7, top=0.9, bottom=0.1)
         canvas.figure.tight_layout()
     else:
         canvas.axes.text(0.5, 0.5, 'No data available', ha='center', va='center')
-
     canvas.draw()
 
 def update_health(canvas, f):
@@ -201,59 +179,30 @@ class WindowManager:
         for win in self.windows.values():
             win.show()
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    manager = WindowManager()
-
-    # Uzupełnione definicje okien w menadżerze
-    manager.add_window("radar", VisualizationWindow(
-        "Live radar data",
-        update_radar,
-        {"Country": "country", "Continent": "continent", "Ground": "on_ground", "Category": "category"},
-        defaults={"country": "None", "continent": "None", "on_ground": "None", "category": "None"}
-    ))
-
-    manager.add_window("airport", VisualizationWindow(
+def create_airport_window():
+    win = VisualizationWindow(
         "Airport traffic",
         update_traffic,
         {"Airport": "airport", "From": "date_from", "To": "date_to"},
-        defaults={"airport": "", "date_from": "2026-01-01", "date_to": "2026-20-09"}
-    ))
+        defaults={"airport": "", "date_from": "2026-01-01", "date_to": "2030-01-01"}
+    )
+    return win
 
-    manager.add_window("trajectory", VisualizationWindow(
-        "Aircraft trajectory",
-        update_trajectory,
-        {"ICAO24": "icao24", "Time From": "time_from"},
-        defaults={"icao24": "None", "time_from": "None"}
-    ))
-
-    manager.add_window("continents", VisualizationWindow(
+def create_continents_window():
+    all_continents = [c[0] for c in get_continent_names()]
+    win = VisualizationWindow(
         "Continent distribution",
         update_distribution,
-        {}
-    ))
+        {},
+        checkboxes=all_continents
+    )
+    return win
 
-    manager.add_window("health", VisualizationWindow(
+def create_health_window():
+    win = VisualizationWindow(
         "System health report",
         update_health,
         {"Status": "status"},
         defaults={"status": ""}
-    ))
-
-    #radar nie działa bo queries źle działa
-    #manager.show("radar")
-
-    #działa super
-    #manager.show("airport")
-
-    #napraw
-    #manager.show("trajectory")
-
-    #działa super
-    #manager.show("continents")
-
-    #działa super
-    #manager.show("health")
-
-    sys.exit(app.exec())
+    )
+    return win
