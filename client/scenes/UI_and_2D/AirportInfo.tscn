@@ -1,0 +1,192 @@
+[gd_scene load_steps=3 format=3 uid="uid://1pqc1ct33yo3"]
+
+[ext_resource type="Theme" uid="uid://cdsf71uxhhetu" path="res://assets/DefaultTheme.tres" id="1_7unko"]
+[ext_resource type="Script" uid="uid://w7l1o18idgxc" path="res://scripts/graph/InfoDisplay.gd" id="2_aeg51"]
+
+[node name="InfoDisplay" type="Control" node_paths=PackedStringArray("airport_name", "arrivals", "departures", "type", "country", "icao", "call_sign", "plane_country", "flight_start", "flight_end", "longitude", "latitude", "amplitude", "velocity")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_7unko")
+script = ExtResource("2_aeg51")
+airport_name = NodePath("MarginContainer/TabContainer/Airport/VBoxContainer/Airport")
+arrivals = NodePath("MarginContainer/TabContainer/Airport/VBoxContainer/Przyloty")
+departures = NodePath("MarginContainer/TabContainer/Airport/VBoxContainer/Odloty")
+type = NodePath("MarginContainer/TabContainer/Airport/VBoxContainer/Type")
+country = NodePath("MarginContainer/TabContainer/Airport/VBoxContainer/Country")
+icao = NodePath("MarginContainer/TabContainer/Plane/VBoxContainer/Icao24")
+call_sign = NodePath("MarginContainer/TabContainer/Plane/VBoxContainer/Callsign")
+plane_country = NodePath("MarginContainer/TabContainer/Plane/VBoxContainer/CountryOfOrigin")
+flight_start = NodePath("MarginContainer/TabContainer/Plane/VBoxContainer/CurentDeparture")
+flight_end = NodePath("MarginContainer/TabContainer/Plane/VBoxContainer/CurrentArrival")
+longitude = NodePath("MarginContainer/TabContainer/Route/VBoxContainer/Longitude")
+latitude = NodePath("MarginContainer/TabContainer/Route/VBoxContainer/Latitude")
+amplitude = NodePath("MarginContainer/TabContainer/Route/VBoxContainer/Aptitude")
+velocity = NodePath("MarginContainer/TabContainer/Route/VBoxContainer/Velocity")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -364.0
+offset_top = -367.0
+offset_right = 3.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="TabContainer" type="TabContainer" parent="MarginContainer"]
+layout_mode = 2
+current_tab = 1
+
+[node name="Airport" type="TabBar" parent="MarginContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/TabContainer/Airport"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Airport" type="LineEdit" parent="MarginContainer/TabContainer/Airport/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Airport"
+editable = false
+
+[node name="Country" type="LineEdit" parent="MarginContainer/TabContainer/Airport/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Country"
+editable = false
+
+[node name="Type" type="LineEdit" parent="MarginContainer/TabContainer/Airport/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Type"
+editable = false
+
+[node name="Odloty" type="LineEdit" parent="MarginContainer/TabContainer/Airport/VBoxContainer"]
+layout_mode = 2
+text = "2000"
+editable = false
+
+[node name="Przyloty" type="LineEdit" parent="MarginContainer/TabContainer/Airport/VBoxContainer"]
+layout_mode = 2
+text = "3000"
+editable = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/TabContainer/Airport/VBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="MarginContainer/TabContainer/Airport/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Arival"
+
+[node name="Button2" type="Button" parent="MarginContainer/TabContainer/Airport/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Depart"
+
+[node name="Button3" type="Button" parent="MarginContainer/TabContainer/Airport/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Get"
+
+[node name="Plane" type="TabBar" parent="MarginContainer/TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/TabContainer/Plane"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Icao24" type="LineEdit" parent="MarginContainer/TabContainer/Plane/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "ICAO"
+editable = false
+
+[node name="Callsign" type="LineEdit" parent="MarginContainer/TabContainer/Plane/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Callsign"
+editable = false
+
+[node name="CountryOfOrigin" type="LineEdit" parent="MarginContainer/TabContainer/Plane/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "country"
+editable = false
+
+[node name="CurentDeparture" type="LineEdit" parent="MarginContainer/TabContainer/Plane/VBoxContainer"]
+layout_mode = 2
+text = "2000"
+placeholder_text = "date of departure"
+editable = false
+
+[node name="CurrentArrival" type="LineEdit" parent="MarginContainer/TabContainer/Plane/VBoxContainer"]
+layout_mode = 2
+text = "3000"
+placeholder_text = "date of arrival"
+editable = false
+
+[node name="Button" type="Button" parent="MarginContainer/TabContainer/Plane/VBoxContainer"]
+layout_mode = 2
+text = "Get More Data"
+
+[node name="Route" type="TabBar" parent="MarginContainer/TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/TabContainer/Route"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Longitude" type="LineEdit" parent="MarginContainer/TabContainer/Route/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Longitude"
+editable = false
+
+[node name="Latitude" type="LineEdit" parent="MarginContainer/TabContainer/Route/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Latitude"
+editable = false
+
+[node name="Aptitude" type="LineEdit" parent="MarginContainer/TabContainer/Route/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Amplitude"
+editable = false
+
+[node name="Velocity" type="LineEdit" parent="MarginContainer/TabContainer/Route/VBoxContainer"]
+layout_mode = 2
+text = "2000"
+placeholder_text = "Velocity"
+editable = false
+
+[node name="Button" type="Button" parent="MarginContainer/TabContainer/Route/VBoxContainer"]
+layout_mode = 2
+text = "Get More Data"
+
+[connection signal="pressed" from="MarginContainer/TabContainer/Airport/VBoxContainer/HBoxContainer/Button" to="." method="set_airport_end"]
+[connection signal="pressed" from="MarginContainer/TabContainer/Airport/VBoxContainer/HBoxContainer/Button2" to="." method="set_airport_start"]

@@ -161,7 +161,7 @@ def run_flight_etl():
     with connect_db() as conn:
         try:
             end_ts = int(datetime.now(timezone.utc).timestamp()) - (2*3600)
-            begin_ts = end_ts - 12 * 3600
+            begin_ts = end_ts - 1 * 3600
             flights = fetch_all_flights(begin_ts, end_ts)
             if not flights:
                 logging.warning("No flight found in given time range.")

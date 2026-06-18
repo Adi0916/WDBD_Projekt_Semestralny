@@ -8,14 +8,14 @@ const airport: PackedScene = preload("res://scenes/3D scenes/Airport.tscn")
 @export var plane_node: Node3D
 @export var path_node: Node3D
 @export var airport_node: Node3D
-@export var data_loader: LoadData
+@export var filters: Filters
 
 func _ready() -> void:
-	data_loader.airports_loaded.connect(airport_data_handler)
-	data_loader.path_loaded.connect(route_data_handler)
-	data_loader.plane_loaded.connect(plane_data_handler)
-	data_loader.load_path()
-
+	DataLoader.airports_loaded.connect(airport_data_handler)
+	DataLoader.path_loaded.connect(route_data_handler)
+	DataLoader.plane_loaded.connect(plane_data_handler)
+	DataLoader.load_airports()
+		
 func add_route(route_id: int, route: Array[FlightData]) -> void:
 	var root: Node3D = Node3D.new()
 	root.name = str(route_id)
@@ -24,7 +24,7 @@ func add_route(route_id: int, route: Array[FlightData]) -> void:
 		tmp.flight_data = route_point
 		tmp.set_pos(route_point.longnitude, route_point.latitude)
 		root.add_child(tmp)
-	data_loader.load_plane(root.get_child(root.get_child_count()/2))
+	DataLoader.load_plane_by_path(route_id, root.get_child(root.get_child_count()/2))
 	path_node.add_child(root, true)
 
 func clear_routes(node: Node3D) -> void:
@@ -58,7 +58,7 @@ func add_airport(airport_icao: String, airport_data: AirportData):
 # Request Handlers
 func airport_data_handler(airports: Array[AirportData]) -> void:
 	for port in airports:
-		add_airport(airport.icao, port)
+		add_airport(port.icao, port)
 
 func route_data_handler(route_data: Dictionary[int, Array]) -> void:
 	print(route_data.keys())
@@ -66,10 +66,12 @@ func route_data_handler(route_data: Dictionary[int, Array]) -> void:
 		add_route(key, route_data[key])
 
 func plane_data_handler(plane_data: PlaneData, route_point: RoutePoint) -> void:
+	print(plane_data.plane_name, plane_data.icao24)
 	var tmp: PlaneVis = plane.instantiate()
 	tmp.flight_data = route_point.flight_data
 	tmp.plane_data = plane_data
 	tmp.rotation = route_point.rotation
-	tmp.name = route_point.get_parent().name
+	tmp.name = plane_data.icao24
 	route_point.queue_free()
 	plane_node.add_child(tmp, true)
+	

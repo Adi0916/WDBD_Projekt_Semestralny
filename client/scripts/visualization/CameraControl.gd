@@ -1,10 +1,14 @@
 extends Camera3D
 class_name CameraControl
 
+signal airport_data_read(data: AirportData)
+signal aircraft_data_read(data: PlaneStateData)
+signal route_data_read(data: FlightData)
+
 @export var rotator: Node3D
 var camera_movement: bool = false
 var planet_pos: Vector2 = Vector2.ZERO
-
+@export var info_display: PlaneDataInfo
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouse:
 		
@@ -25,7 +29,15 @@ func _input(event: InputEvent) -> void:
 					var data: PlaneStateData = ray_res["collider"].return_data()
 					planet_pos.x = data.flight_data.latitude - 13 # Poprawka przez perspektywe
 					planet_pos.y = -data.flight_data.longnitude + 2.0 # Poprawka przez perspektywe
-
+					info_display.read_aircraft_data(data)
+				elif ray_res["collider"] is Airport:
+					var data: AirportData = ray_res["collider"].return_data()
+					planet_pos.x = data.latitude - 13 # Poprawka przez perspektywe
+					planet_pos.y = -data.longnitude + 2.0 # Poprawka przez perspektywe
+					info_display.read_airport_data(data)
+				elif ray_res["collider"] is RoutePoint:
+					var data: FlightData = ray_res["collider"].return_data()
+					info_display.read_route_data(data)
 	if event is InputEventMouseMotion and camera_movement:
 		var velocity: Vector2 = event.velocity
 		planet_pos.x = rotator.rotation_degrees.x + deg_to_rad(velocity.y)

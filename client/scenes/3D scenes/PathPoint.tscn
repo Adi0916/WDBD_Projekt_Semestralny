@@ -3,12 +3,12 @@
 [ext_resource type="Script" uid="uid://ci4jkcghmdm6o" path="res://scripts/visualization/RoutePoint.gd" id="1_fvjsa"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_fvjsa"]
-radius = 0.05
+radius = 0.005
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvjsa"]
 transparency = 1
 shading_mode = 0
-albedo_color = Color(1, 0, 0, 1)
+albedo_color = Color(1, 0.6431373, 0.31764707, 0.60784316)
 
 [sub_resource type="SphereMesh" id="SphereMesh_obu64"]
 material = SubResource("StandardMaterial3D_fvjsa")
