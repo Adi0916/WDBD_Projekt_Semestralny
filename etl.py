@@ -88,7 +88,6 @@ def get_airport_info(conn, icao_code):
                     type = excluded.type
                     ''', (icao_code, airport_name, country_id, lat, lon, apt_type))
 
-
 def run_radar_etl():
     logging.info("Starting RADAR ETL")
 
@@ -161,7 +160,7 @@ def run_flight_etl():
     with connect_db() as conn:
         try:
             end_ts = int(datetime.now(timezone.utc).timestamp()) - (2*3600)
-            begin_ts = end_ts - 4 * 3600
+            begin_ts = end_ts - (4 * 3600)
             flights = fetch_all_flights(begin_ts, end_ts)
             if not flights:
                 logging.warning("No flight found in given time range.")
@@ -208,6 +207,29 @@ def run_flight_etl():
             logging.error(f"FLIGHT ETL failed: {e}")
             log_import_run(conn, 0, 0, "FAILED - F", str(e))
 
+def link_location_to_flight():
+
+    logging.info("Linking locations to flights...")
+    with connect_db() as conn:
+        try:
+
+            cur = conn.execute('''
+                UPDATE location
+                SET flight_id = (
+                    SELECT flight_id 
+                    FROM flight_data f
+                    WHERE f.aircraft_id = location.aircraft_id 
+                      AND location.time_pos >= f.departure_date_time 
+                      AND location.time_pos <= f.arrival_date_time
+                    LIMIT 1
+                )
+                WHERE flight_id IS NULL AND time_pos IS NOT NULL
+            ''')
+            conn.commit()
+            logging.info(f"Updated {cur.rowcount} locations with specific flight_ids.")
+        except Exception as e:
+            logging.error(f"Error linking locations to flights: {e}")
+
 def run_etl():
     run_radar_etl()
     run_flight_etl()
@@ -217,3 +239,4 @@ if __name__ == "__main__":
     from database import create_tables
     create_tables()
     run_etl()
+    link_location_to_flight()
