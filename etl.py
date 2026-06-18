@@ -35,7 +35,7 @@ def get_airport_info(conn, icao_code):
 
     if not icao_code or icao_code.strip() == "":
         return
-    
+
     continent_code = "Unknown"
     country_code = "Unknown"
     airport_name = "Unknown"
@@ -68,7 +68,7 @@ def get_airport_info(conn, icao_code):
 
     conn.execute(''' insert into continent (continent_name) values (?)
                     on conflict(continent_name) do nothing''', (continent_name,))
-    
+
     res = conn.execute('SELECT continent_id FROM continent WHERE continent_name = ?', (continent_name,))
     continent_id = res.fetchone()[0]
 
@@ -87,7 +87,6 @@ def get_airport_info(conn, icao_code):
                     longitude = excluded.longitude,
                     type = excluded.type
                     ''', (icao_code, airport_name, country_id, lat, lon, apt_type))
-        
 
 def run_radar_etl():
     logging.info("Starting RADAR ETL")
@@ -100,7 +99,7 @@ def run_radar_etl():
                 logging.warning("No data received from API in given bounding box.")
                 log_import_run(conn, 0, 0, "SUCCESS", "No Data")
                 return
-            
+
             recieved = len(states)
             saved = 0
 
@@ -118,7 +117,7 @@ def run_radar_etl():
                     true_track = state[10] if len(state) > 10 else None
                     geo_altitude = state[13] if len(state) > 13 else None
 
-                    
+
                     conn.execute('''
                         INSERT INTO country (country_name)
                         VALUES (?)
@@ -126,7 +125,7 @@ def run_radar_etl():
                     ''', (origin_country,))
                     c_res = conn.execute('SELECT country_id FROM country WHERE country_name = ?', (origin_country,))
                     country_id = c_res.fetchone()[0]
-                    
+
                     conn.execute('''
                             INSERT INTO aircraft (icao24, callsign, country_id, last_updated)
                     VALUES (?, ?, ?, ?)
@@ -135,7 +134,7 @@ def run_radar_etl():
                         country_id = excluded.country_id,
                         last_updated = excluded.last_updated;
                     ''', (icao24, callsign, country_id, datetime.now(timezone.utc).isoformat()))
-            
+
                     if time_position:
                         dt_pos = datetime.fromtimestamp(time_position, tz=timezone.utc).isoformat()
                         cur = conn.execute('''
@@ -143,7 +142,7 @@ def run_radar_etl():
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                         ON CONFLICT(aircraft_id, time_pos) DO NOTHING;
                     ''', (icao24, true_track, longitude, latitude, baro_altitude, geo_altitude, velocity, on_ground, dt_pos))
-                    
+
                         if cur.rowcount > 0:
                             saved += 1
                 except Exception as row_error:
@@ -151,7 +150,7 @@ def run_radar_etl():
                     continue
             log_import_run(conn, recieved, saved, "SUCCESS - RADAR")
             logging.info(f"ETL completed: {recieved} records received, {saved} records saved.")
-        
+
         except Exception as e:
             logging.error(f"RADAR ETL failed: {e}")
             log_import_run(conn, 0, 0, "FAILED - R", str(e))
@@ -161,13 +160,13 @@ def run_flight_etl():
     with connect_db() as conn:
         try:
             end_ts = int(datetime.now(timezone.utc).timestamp()) - (2*3600)
-            begin_ts = end_ts - 1 * 3600
+            begin_ts = end_ts - (4 * 3600)
             flights = fetch_all_flights(begin_ts, end_ts)
             if not flights:
                 logging.warning("No flight found in given time range.")
                 log_import_run(conn, 0, 0, "SUCCESS", "No Data")
                 return
-            
+
             received = len(flights)
             saved = 0
 
@@ -182,24 +181,24 @@ def run_flight_etl():
                     departure_airport_id = None
                 if not arrival_airport_id or arrival_airport_id.strip() == "":
                     arrival_airport_id = None
-                
+
                 conn.execute(''' insert into aircraft (icao24) values (?) on conflict(icao24) do nothing''', (icao24,))
-                
+
                 if departure_airport_id:
                     get_airport_info(conn, departure_airport_id)
                 if arrival_airport_id:
                     get_airport_info(conn, arrival_airport_id)
-               
+
                 cur = conn.execute('''
-                                    select 1 from flight_data 
+                                    select 1 from flight_data
                                     where aircraft_id = ? and departure_date_time = ?''', (icao24, departure_date_time))
-                
+
                 if not cur.fetchone():
                     conn.execute('''
                         insert into flight_data (aircraft_id, departure_airport_id, arrival_airport_id, departure_date_time, arrival_date_time)
-                        values (?, ?, ?, ?, ?)''', 
+                        values (?, ?, ?, ?, ?)''',
                         (icao24, departure_airport_id, arrival_airport_id, departure_date_time, arrival_date_time))
-                    
+
                     saved += 1
             log_import_run(conn, received, saved, "SUCCESS - FLIGHT")
             logging.info(f"FLIGHT ETL completed: {received} records received, {saved} records saved.")
@@ -207,6 +206,29 @@ def run_flight_etl():
         except Exception as e:
             logging.error(f"FLIGHT ETL failed: {e}")
             log_import_run(conn, 0, 0, "FAILED - F", str(e))
+
+def link_location_to_flight():
+
+    logging.info("Linking locations to flights...")
+    with connect_db() as conn:
+        try:
+
+            cur = conn.execute('''
+                UPDATE location
+                SET flight_id = (
+                    SELECT flight_id 
+                    FROM flight_data f
+                    WHERE f.aircraft_id = location.aircraft_id 
+                      AND location.time_pos >= f.departure_date_time 
+                      AND location.time_pos <= f.arrival_date_time
+                    LIMIT 1
+                )
+                WHERE flight_id IS NULL AND time_pos IS NOT NULL
+            ''')
+            conn.commit()
+            logging.info(f"Updated {cur.rowcount} locations with specific flight_ids.")
+        except Exception as e:
+            logging.error(f"Error linking locations to flights: {e}")
 
 def run_etl():
     run_radar_etl()
@@ -217,3 +239,4 @@ if __name__ == "__main__":
     from database import create_tables
     create_tables()
     run_etl()
+    link_location_to_flight()

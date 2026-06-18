@@ -5,15 +5,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 #1: Najnowsze pozycje samolotów
 
-def get_live_radar_data(country_name=None, continent_name=None, on_ground=None, category=None):
+def get_live_radar_data(country_name=None, continent_name=None, on_ground=None):
 
     query = '''
-        SELECT 
+        SELECT
             a.icao24,
             a.callsign,
             c.country_name,
             ct.continent_name,
-            a.aircraft_category,
             l.latitude,
             l.longitude,
             l.baro_altitude,
@@ -43,9 +42,6 @@ def get_live_radar_data(country_name=None, continent_name=None, on_ground=None, 
     if on_ground is not None:
         query += " AND l.on_ground = ?"
         params.append(1 if on_ground else 0)
-    if category is not None:
-        query += " AND a.aircraft_category = ?"
-        params.append(category)
 
     with connect_db() as conn:
         cursor = conn.execute(query, params)
@@ -57,7 +53,7 @@ def get_live_radar_data(country_name=None, continent_name=None, on_ground=None, 
 def get_airport_traffic_stats(airport_code=None, date_from=None, date_to=None):
 
     query = '''
-        SELECT 
+        SELECT
             id_lotniska,
             COUNT(DISTINCT wylot_id) as liczba_wylotów,
             COUNT(DISTINCT przylot_id) as liczba_przylotów,
@@ -112,22 +108,44 @@ def get_aircraft_trajectory(icao24, time_from=None):
 
 #4: Udział procentowy kontynentów lub kategorii w globalnym ruchu
 
-def get_continent_distribution_stats():
- 
+def get_continent_distribution_stats(exclude_list=None):
+    if exclude_list is None:
+        exclude_list = []
+
+    # Tworzymy placeholder dla każdego elementu w liście (np. ?, ?, ?)
+    placeholders = ', '.join(['?'] * len(exclude_list))
+
     query = '''
-        SELECT 
+        SELECT
             COALESCE(ct.continent_name, 'Unknown') as continent,
             COUNT(a.icao24) as aircraft_count
         FROM aircraft a
         LEFT JOIN country c ON a.country_id = c.country_id
         LEFT JOIN continent ct ON c.continent_id = ct.continent_id
-        GROUP BY continent
-        ORDER BY aircraft_count DESC
+    '''
+
+    # Jeśli są kontynenty do wykluczenia, dodajemy warunek WHERE
+    if exclude_list:
+        query += f" WHERE COALESCE(ct.continent_name, 'Unknown') NOT IN ({placeholders})"
+
+    query += " GROUP BY continent ORDER BY aircraft_count DESC"
+
+    with connect_db() as conn:
+        cursor = conn.execute(query, exclude_list)
+        return cursor.fetchall()
+
+# Pobranie nazw kontynentów do filtrowania
+
+def get_continent_names():
+    query = '''
+        SELECT
+            DISTINCT(continent_name)
+        FROM continent
+        ORDER BY continent_name
     '''
     with connect_db() as conn:
         cursor = conn.execute(query)
         return cursor.fetchall()
-
 
 
 #5: Raport techniczny
@@ -150,3 +168,4 @@ def get_system_health_report(status_filter=None):
     with connect_db() as conn:
         cursor = conn.execute(query, params)
         return cursor.fetchall()
+
