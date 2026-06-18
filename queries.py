@@ -6,9 +6,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 #1: Najnowsze pozycje samolotów
 
 def get_live_radar_data(country_name=None, continent_name=None, on_ground=None, category=None):
-
+    #a.aircraft_category, to nie istniało więc usunąłem
     query = '''
-        SELECT 
+        SELECT
             a.icao24,
             a.callsign,
             c.country_name,
@@ -57,7 +57,7 @@ def get_live_radar_data(country_name=None, continent_name=None, on_ground=None, 
 def get_airport_traffic_stats(airport_code=None, date_from=None, date_to=None):
 
     query = '''
-        SELECT 
+        SELECT
             id_lotniska,
             COUNT(DISTINCT wylot_id) as liczba_wylotów,
             COUNT(DISTINCT przylot_id) as liczba_przylotów,
@@ -113,9 +113,9 @@ def get_aircraft_trajectory(icao24, time_from=None):
 #4: Udział procentowy kontynentów lub kategorii w globalnym ruchu
 
 def get_continent_distribution_stats():
- 
+
     query = '''
-        SELECT 
+        SELECT
             COALESCE(ct.continent_name, 'Unknown') as continent,
             COUNT(a.icao24) as aircraft_count
         FROM aircraft a
@@ -150,3 +150,8 @@ def get_system_health_report(status_filter=None):
     with connect_db() as conn:
         cursor = conn.execute(query, params)
         return cursor.fetchall()
+
+if __name__ == "__main__":
+    df = get_system_health_report()
+    print(df)
+
