@@ -7,7 +7,10 @@ requires-python = ">=3.13"
 dependencies = [
     "airports-py>=3.1.0",
     "logging>=0.4.9.6",
+    "matplotlib>=3.11.0",
+    "pandas>=3.0.3",
     "pycountry>=26.2.16",
+    "pyqt6>=6.11.0",
     "requests>=2.34.2",
     "schedule>=1.2.2",
     "sqlalchemy>=2.0.49",

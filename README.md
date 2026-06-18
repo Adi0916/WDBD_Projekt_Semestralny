@@ -5,16 +5,21 @@ This system is designed for the automatic collection and analysis of real-time a
 
 ## Project Structure
 ```text
-├── api_client.py        # Communication with OpenSky API
-├── database.py          # Database connection and schema (SQLite)
-├── etl.py               # ETL (Extract-Transform-Load) logic
-├── main.py              # Main entry point
-├── queries.py           # SQL analytical queries
-├── scheduler.py         # Automation of periodic data import
-├── opensky_ERD.pgerd    # Database ERD diagram
-├── pyproject.toml       # Project configuration (uv)
-├── uv.lock              # Dependency lockfile
-└── README.md            # Project documentation
+├── create_win/
+    ├── start_airport.py        # Create airport window
+    ├── start_continents.py     # Create continent window
+    ├── start_health.py         # Create healt window
+├── plot.py                     # Visualize data
+├── api_client.py               # Communication with OpenSky API
+├── database.py                 # Database connection and schema (SQLite)
+├── etl.py                      # ETL (Extract-Transform-Load) logic
+├── main.py                     # Main entry point
+├── queries.py                  # SQL analytical queries
+├── scheduler.py                # Automation of periodic data import
+├── opensky_ERD.pgerd           # Database ERD diagram
+├── pyproject.toml              # Project configuration (uv)
+├── uv.lock                     # Dependency lockfile
+└── README.md                   # Project documentation
 ```
 
 ## Installation and Usage
