@@ -45,6 +45,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS location (
                 location_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 aircraft_id TEXT REFERENCES aircraft(icao24),
+                flight_id INTEGER REFERENCES flight_data(flight_id),
                 true_track REAL,
                 longitude REAL,
                 latitude REAL,
@@ -64,6 +65,7 @@ def create_tables():
                 status TEXT,
                 error_message TEXT
             );
+        create index IF NOT EXISTS idx_location_flight ON location(flight_id);
                            ''')
         conn.commit()
 

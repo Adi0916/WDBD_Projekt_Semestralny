@@ -5,15 +5,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 #1: Najnowsze pozycje samolotów
 
-def get_live_radar_data(country_name=None, continent_name=None, on_ground=None, category=None):
-    #a.aircraft_category, to nie istniało więc usunąłem
+def get_live_radar_data(country_name=None, continent_name=None, on_ground=None):
+
     query = '''
         SELECT
             a.icao24,
             a.callsign,
             c.country_name,
             ct.continent_name,
-            a.aircraft_category,
             l.latitude,
             l.longitude,
             l.baro_altitude,
@@ -43,9 +42,6 @@ def get_live_radar_data(country_name=None, continent_name=None, on_ground=None, 
     if on_ground is not None:
         query += " AND l.on_ground = ?"
         params.append(1 if on_ground else 0)
-    if category is not None:
-        query += " AND a.aircraft_category = ?"
-        params.append(category)
 
     with connect_db() as conn:
         cursor = conn.execute(query, params)
