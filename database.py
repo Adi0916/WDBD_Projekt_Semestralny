@@ -1,5 +1,5 @@
 import _sqlite3
-import os 
+import os
 
 DB_NAME = "opensky_data.db"
 
@@ -20,7 +20,7 @@ def create_tables():
                            country_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             country_name TEXT NOT NULL UNIQUE,
                             continent_id INTEGER REFERENCES continent(continent_id));
-        
+
         CREATE TABLE IF NOT EXISTS airport (
                            icao_code text primary key,
                            airport_name text,
@@ -41,7 +41,7 @@ def create_tables():
                 arrival_airport_id TEXT REFERENCES airport(icao_code),
                 departure_date_time TEXT,
                 arrival_date_time TEXT);
-                           
+
         CREATE TABLE IF NOT EXISTS location (
                 location_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 aircraft_id TEXT REFERENCES aircraft(icao24),
