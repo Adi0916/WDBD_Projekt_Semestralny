@@ -60,7 +60,7 @@ mesh = SubResource("SphereMesh_qs1ay")
 [node name="Node3D" type="Node3D" parent="."]
 
 [node name="Camera3D" type="Camera3D" parent="Node3D" node_paths=PackedStringArray("rotator", "info_display")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.3, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
 fov = 40.0
 script = ExtResource("4_dt1d4")
 rotator = NodePath("../../MeshInstance3D")
@@ -97,7 +97,7 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_top = -600.0
-offset_right = 275.0
+offset_right = 387.0
 grow_vertical = 0
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
@@ -211,3 +211,4 @@ text = "Search Flights"
 [connection signal="text_submitted" from="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer4/LineEdit2" to="Filters" method="filter"]
 [connection signal="text_submitted" from="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer5/LineEdit2" to="Filters" method="filter"]
 [connection signal="text_submitted" from="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer6/LineEdit2" to="Filters" method="filter"]
+[connection signal="pressed" from="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/Button" to="." method="search_paths"]

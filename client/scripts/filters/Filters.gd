@@ -25,7 +25,7 @@ func _ready() -> void:
 	
 	set_last_check()
 
-func filter(param: Variant.Type) -> void:
+func filter(param: String) -> void:
 	timestamp_start = Time.get_unix_time_from_datetime_string(fields[0].text)
 	timestamp_end = Time.get_unix_time_from_datetime_string(fields[1].text)
 	airport_start = fields[2].text
@@ -35,6 +35,11 @@ func filter(param: Variant.Type) -> void:
 	set_last_check()
 
 func set_last_check() -> void:
-	fields[0].text = Time.get_date_string_from_unix_time(timestamp_start)
-	fields[1].text = Time.get_date_string_from_unix_time(timestamp_end)
+	fields[0].text = Time.get_datetime_string_from_unix_time(timestamp_start)
+	fields[1].text = Time.get_datetime_string_from_unix_time(timestamp_end)
 	fields[5].text = str(limit)
+
+func get_filter_params() -> Array:
+	var res: Array = [Time.get_datetime_string_from_unix_time(timestamp_start)+"+00:00", Time.get_datetime_string_from_unix_time(timestamp_end)+"+00:00"]
+	res.append(limit)
+	return res

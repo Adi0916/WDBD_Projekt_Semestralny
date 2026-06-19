@@ -38,15 +38,18 @@ func read_airport_data(airport_data: AirportData) -> void:
 func read_aircraft_data(aircraft_data: PlaneStateData) -> void:
 	current_aircraft_data = aircraft_data.plane_data
 	var data := DataLoader.get_aircraft_time_data(aircraft_data.plane_data.icao24)
+	icao.text = aircraft_data.plane_data.icao24
+	plane_country.text = aircraft_data.plane_data.country
+	call_sign.text = aircraft_data.plane_data.plane_name
 	read_route_data(aircraft_data.flight_data)
 
 
 func read_route_data(flight_data: FlightData) -> void:
 	current_flight_data = flight_data
 	longitude.text = "Longitude: "+str(flight_data.longnitude)
-	latitude.text = "Latitude"+str(flight_data.latitude)
-	amplitude.text = "Amplitude"+str(flight_data.amplitude)
-	velocity.text = "Velocity"+str(flight_data.velocity)
+	latitude.text = "Latitude: "+str(flight_data.latitude)
+	amplitude.text = "Amplitude: "+str(flight_data.amplitude)
+	velocity.text = "Velocity: "+str(flight_data.velocity)
 
 	pass
 	

@@ -2,7 +2,7 @@ extends Node
 class_name LoadData
 
 # Visualization Data Loaded
-signal path_loaded(data: Dictionary[int, Array])
+signal path_loaded(data: Dictionary[String, Array])
 signal plane_loaded(data: PlaneData, node: RoutePoint)
 signal airports_loaded(data: Array[AirportData])
 
@@ -18,53 +18,47 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	database.close_db()
 
-func load_flights() -> void:
-	print("Loading path...")
-	var data: Array[FlightData]
+func load_flights(filters: Filters) -> void:
+	var data: Dictionary[String, Array]
 	var query:= """
-	SELECT longitude lon, latitude lat, amplitude amp
+	SELECT longitude lon, latitude lat, geo_altitude amp, velocity vel, l.aircraft_id id
+	FROM location l
+	WHERE l.aircraft_id IN
+		(SELECT DISTINCT l.aircraft_id
+		FROM location l
+		WHERE time_pos BETWEEN ? AND ?
+		ORDER BY l.aircraft_id, l.time_pos
+		LIMIT ?)
 	"""
-	path_loaded.emit({1:data} as Dictionary[int, Array])
-	print("Path loading Successful!")
+	var params: Array = filters.get_filter_params()
+	params.append(filters.limit)
+	database.query_with_bindings(query, params)
+	for row in database.query_result:
+		if row["id"] not in data.keys():
+			data[row["id"]] = []
+		data[row["id"]].append(FlightData.new(row["lon"], row["lat"],row["vel"], row["amp"]))
+	path_loaded.emit(data)
 
 func load_plane_by_icao(icao: String, node: Node3D) -> void:
-	print("Loading plane...")
 	var query:= """
-	SELECT icao24, call_sign, c.country 
+	SELECT icao24, callsign, c.country_name country
 	FROM aircraft a
 	INNER JOIN country c ON a.country_id = c.country_id
 	WHERE icao24 = ?;
 	"""
 	var err := database.query_with_bindings(query, [icao])
-	if err: return
-	var first_plane :Dictionary= database.query_result[0]
+	if not err: return
+	var first_plane:Dictionary= database.query_result[0]
 	var pd: PlaneData = PlaneData.new()
 	pd.icao24 = first_plane["icao24"]
-	pd.plane_name = first_plane["call_sign"]
+	pd.plane_name = first_plane["callsign"]
 	pd.country = first_plane["country"]
 	plane_loaded.emit(pd, node)
-	print("Plane loading Successful!")
-
-func load_plane_by_path(path_id: int, node: Node3D) -> void:
-	print("Loading plane...")
-	var query:= """
-	SELECT icao24, call_sign, c.country 
-	FROM aircraft a
-	INNER JOIN country c ON a.country_id = c.country_id
-	WHERE icao24 = ?;
-	"""
-	var err := database.query_with_bindings(query, [path_id])
-	var pd: PlaneData = PlaneData.new()
-	# Kod
-	plane_loaded.emit(pd, node)
-	print("Plane loading Successful!")
 
 func load_airports() -> void:
-	print("Load airports")
 	var data: Array[AirportData] = []
 	var err := database.query("SELECT DISTINCT latitude, longitude, airport_name, icao_code FROM airport WHERE airport_name != 'Unknown'")
 	if !err: 
-		print("Load unsuccessful")
 		return
 	for airport in database.query_result:
 		var temp: AirportData = AirportData.new()
@@ -72,7 +66,6 @@ func load_airports() -> void:
 		temp.latitude = airport["latitude"]
 		temp.longnitude = airport["longitude"]
 		data.append(temp)
-	print("Load successful")
 	airports_loaded.emit(data)
 
 func get_airport_data(icao: String) -> Dictionary:

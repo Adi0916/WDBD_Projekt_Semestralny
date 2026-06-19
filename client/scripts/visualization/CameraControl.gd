@@ -8,7 +8,9 @@ signal route_data_read(data: FlightData)
 @export var rotator: Node3D
 var camera_movement: bool = false
 var planet_pos: Vector2 = Vector2.ZERO
+var step: float = 0.1
 @export var info_display: PlaneDataInfo
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouse:
 		
@@ -16,7 +18,10 @@ func _input(event: InputEvent) -> void:
 			camera_movement = true
 		if event.is_action_released("Click"):
 			camera_movement = false
-			
+		if event.is_action_pressed("zoomin"):
+			global_position.z = clamp(global_position.z-step, 5, 10)
+		if event.is_action_pressed("zoomout"):
+			global_position.z = clamp(global_position.z+step, 5, 10)
 		if event.is_action_pressed("Select"):
 			var from: Vector3 = project_ray_origin(event.position)
 			var to: Vector3 = from + project_ray_normal(event.position)*20
@@ -27,13 +32,13 @@ func _input(event: InputEvent) -> void:
 			if not ray_res.is_empty():
 				if ray_res["collider"] is PlaneVis:
 					var data: PlaneStateData = ray_res["collider"].return_data()
-					planet_pos.x = data.flight_data.latitude - 13 # Poprawka przez perspektywe
-					planet_pos.y = -data.flight_data.longnitude + 2.0 # Poprawka przez perspektywe
+					planet_pos.x = data.flight_data.latitude # Poprawka przez perspektywe
+					planet_pos.y = -data.flight_data.longnitude # Poprawka przez perspektywe
 					info_display.read_aircraft_data(data)
 				elif ray_res["collider"] is Airport:
 					var data: AirportData = ray_res["collider"].return_data()
-					planet_pos.x = data.latitude - 13 # Poprawka przez perspektywe
-					planet_pos.y = -data.longnitude + 2.0 # Poprawka przez perspektywe
+					planet_pos.x = data.latitude # Poprawka przez perspektywe
+					planet_pos.y = -data.longnitude # Poprawka przez perspektywe
 					info_display.read_airport_data(data)
 				elif ray_res["collider"] is RoutePoint:
 					var data: FlightData = ray_res["collider"].return_data()

@@ -6,8 +6,14 @@ class_name FlightData
 @export var amplitude: float # m
 @export var velocity: float # m/s
 
-func _init(long: float, lat: float, vel: float, amp: float) -> void:
+func _init(long: float, lat: float, vel, amp) -> void:
 	self.longnitude = long
 	self.latitude = lat
-	self.amplitude = amp
-	self.velocity = vel
+	if amp is float:
+		self.amplitude = amp
+	else: 
+		self.amplitude = 0
+	if vel is float:
+		self.velocity = vel
+	else:
+		self.velocity = 0

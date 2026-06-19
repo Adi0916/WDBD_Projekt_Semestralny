@@ -16,7 +16,7 @@ func _ready() -> void:
 	DataLoader.plane_loaded.connect(plane_data_handler)
 	DataLoader.load_airports()
 		
-func add_route(route_id: int, route: Array[FlightData]) -> void:
+func add_route(route_id: String, route: Array) -> void:
 	var root: Node3D = Node3D.new()
 	root.name = str(route_id)
 	for route_point in route:
@@ -24,7 +24,7 @@ func add_route(route_id: int, route: Array[FlightData]) -> void:
 		tmp.flight_data = route_point
 		tmp.set_pos(route_point.longnitude, route_point.latitude)
 		root.add_child(tmp)
-	DataLoader.load_plane_by_path(route_id, root.get_child(root.get_child_count()/2))
+	DataLoader.load_plane_by_icao(route_id, root.get_child(root.get_child_count()/2))
 	path_node.add_child(root, true)
 
 func clear_routes(node: Node3D) -> void:
@@ -32,6 +32,7 @@ func clear_routes(node: Node3D) -> void:
 		var tmp := node.get_child(0)
 		node.remove_child(tmp)
 		tmp.free()
+		print(node.get_child_count())
 
 func remove_route(route_id: int) -> void:
 	for i in path_node.get_children_count():
@@ -60,13 +61,11 @@ func airport_data_handler(airports: Array[AirportData]) -> void:
 	for port in airports:
 		add_airport(port.icao, port)
 
-func route_data_handler(route_data: Dictionary[int, Array]) -> void:
-	print(route_data.keys())
+func route_data_handler(route_data: Dictionary[String, Array]) -> void:
 	for key in route_data.keys():
-		add_route(key, route_data[key])
+		add_route(key, route_data[key] as Array[FlightData])
 
 func plane_data_handler(plane_data: PlaneData, route_point: RoutePoint) -> void:
-	print(plane_data.plane_name, plane_data.icao24)
 	var tmp: PlaneVis = plane.instantiate()
 	tmp.flight_data = route_point.flight_data
 	tmp.plane_data = plane_data
@@ -75,3 +74,8 @@ func plane_data_handler(plane_data: PlaneData, route_point: RoutePoint) -> void:
 	route_point.queue_free()
 	plane_node.add_child(tmp, true)
 	
+
+func search_paths() -> void:
+	clear_routes(plane_node)
+	clear_routes(path_node)
+	DataLoader.load_flights(filters)
