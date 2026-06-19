@@ -28,10 +28,9 @@ func load_flights(filters: Filters) -> void:
 		FROM location l
 		WHERE time_pos BETWEEN ? AND ?
 		ORDER BY l.aircraft_id, l.time_pos
-		LIMIT ?)
+		LIMIT ?, ?)
 	"""
 	var params: Array = filters.get_filter_params()
-	params.append(filters.limit)
 	database.query_with_bindings(query, params)
 	for row in database.query_result:
 		if row["id"] not in data.keys():

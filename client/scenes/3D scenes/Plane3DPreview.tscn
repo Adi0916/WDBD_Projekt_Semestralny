@@ -181,7 +181,7 @@ size_flags_horizontal = 3
 [node name="LineEdit" type="LineEdit" parent="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer5"]
 layout_mode = 2
 mouse_filter = 2
-text = "aircraft icao"
+text = "limit"
 editable = false
 
 [node name="LineEdit2" type="LineEdit" parent="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer5"]
@@ -194,7 +194,7 @@ size_flags_horizontal = 3
 [node name="LineEdit" type="LineEdit" parent="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer6"]
 layout_mode = 2
 mouse_filter = 2
-text = "limit"
+text = "from"
 editable = false
 
 [node name="LineEdit2" type="LineEdit" parent="Filters/MarginContainer/Panel/MarginContainer/VBoxContainer/VBoxContainer6"]

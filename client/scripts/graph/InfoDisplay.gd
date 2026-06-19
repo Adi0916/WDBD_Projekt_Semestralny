@@ -66,5 +66,4 @@ func set_airport_end() -> void:
 
 func set_aircraft() -> void:
 	if not current_aircraft_data: return
-	filters.aircraft = current_aircraft_data.plane_name
-	
+	filters.aircraft = int(current_aircraft_data.plane_name)

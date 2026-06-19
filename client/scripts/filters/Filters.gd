@@ -8,7 +8,7 @@ class_name Filters
 @export var country: String
 @export var airport_start: String
 @export var airport_end: String
-@export var aircraft: String
+@export var aircraft: int = 0
 @export var limit: int = 100: 
 	set(value): limit = clampi(value, 1, 200)
 
@@ -30,7 +30,7 @@ func filter(param: String) -> void:
 	timestamp_end = Time.get_unix_time_from_datetime_string(fields[1].text)
 	airport_start = fields[2].text
 	airport_end = fields[3].text
-	aircraft = fields[4].text
+	aircraft = int(fields[4].text)
 	limit = int(fields[5].text)
 	set_last_check()
 
@@ -42,4 +42,5 @@ func set_last_check() -> void:
 func get_filter_params() -> Array:
 	var res: Array = [Time.get_datetime_string_from_unix_time(timestamp_start)+"+00:00", Time.get_datetime_string_from_unix_time(timestamp_end)+"+00:00"]
 	res.append(limit)
+	res.append(aircraft)
 	return res
