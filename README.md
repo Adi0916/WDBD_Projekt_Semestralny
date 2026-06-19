@@ -25,5 +25,5 @@ uv sync
 
 # Run the periodic import scheduler
 uv run scheduler.py
-start exe or run client throught Godot engine with file project.godot in client folder for 3D visualization
 ```
+# start exe or run client throught Godot engine with file project.godot in client folder for 3D visualization
