@@ -169,16 +169,3 @@ def get_system_health_report(status_filter=None):
         cursor = conn.execute(query, params)
         return cursor.fetchall()
 
-def test():
-    query = '''
-        SELECT flight_id
-        FROM location
-    '''
-
-    with connect_db() as conn:
-        cursor = conn.execute(query)
-        return cursor.fetchall()
-
-if __name__ == "__main__":
-    df = test()
-    print(df)
