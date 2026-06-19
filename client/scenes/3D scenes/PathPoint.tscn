@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://bduomkjhum6dg"]
+
+[ext_resource type="Script" uid="uid://ci4jkcghmdm6o" path="res://scripts/visualization/RoutePoint.gd" id="1_fvjsa"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_fvjsa"]
+radius = 0.005
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvjsa"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.6431373, 0.31764707, 0.60784316)
+
+[sub_resource type="SphereMesh" id="SphereMesh_obu64"]
+material = SubResource("StandardMaterial3D_fvjsa")
+radius = 0.005
+height = 0.01
+
+[node name="RoutePoint" type="StaticBody3D"]
+script = ExtResource("1_fvjsa")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+shape = SubResource("SphereShape3D_fvjsa")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+mesh = SubResource("SphereMesh_obu64")

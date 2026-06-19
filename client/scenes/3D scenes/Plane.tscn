@@ -1,0 +1,80 @@
+[gd_scene load_steps=8 format=3 uid="uid://c5bt1u7uxxf1t"]
+
+[ext_resource type="Script" uid="uid://bcfqxqfltwsft" path="res://scripts/visualization/Plane.gd" id="1_forlt"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_elp50"]
+radius = 0.03
+
+[sub_resource type="Animation" id="Animation_ctdb1"]
+resource_name = "Blinking"
+loop_mode = 1
+step = 0.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:light_energy")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(3.4822013, 0.27739242, 2.378419),
+"update": 0,
+"values": [0.5, 1.0, 0.5]
+}
+
+[sub_resource type="Animation" id="Animation_6yqq2"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:light_energy")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qbpoo"]
+_data = {
+&"Blinking": SubResource("Animation_ctdb1"),
+&"RESET": SubResource("Animation_6yqq2")
+}
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_elp50"]
+emission_enabled = true
+emission = Color(1, 1, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_elp50"]
+material = SubResource("StandardMaterial3D_elp50")
+radius = 0.02
+height = 0.04
+
+[node name="Plane" type="StaticBody3D" node_paths=PackedStringArray("anmiate")]
+script = ExtResource("1_forlt")
+anmiate = NodePath("AnimationPlayer")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+shape = SubResource("SphereShape3D_elp50")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+light_color = Color(0.681046, 0.5019657, 1.92523e-07, 1)
+light_energy = 0.5
+omni_range = 1.0
+omni_attenuation = 0.1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+reset_on_save = false
+root_node = NodePath("../OmniLight3D")
+libraries = {
+&"": SubResource("AnimationLibrary_qbpoo")
+}
+autoplay = "Blinking"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+mesh = SubResource("SphereMesh_elp50")

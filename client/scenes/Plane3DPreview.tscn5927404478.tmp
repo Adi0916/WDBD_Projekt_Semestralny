@@ -1,0 +1,53 @@
+[gd_scene load_steps=9 format=3 uid="uid://b8sovhieh822b"]
+
+[ext_resource type="Texture2D" uid="uid://cv4wbjj83xaw8" path="res://textures/earth albedo.jpg" id="1_5d3a3"]
+[ext_resource type="Texture2D" uid="uid://bmbvmxyyby5cy" path="res://textures/earth night_lights_modified.png" id="2_cultp"]
+[ext_resource type="PackedScene" uid="uid://c5bt1u7uxxf1t" path="res://Scenes/Plane.tscn" id="3_qs1ay"]
+[ext_resource type="Script" uid="uid://dtftd2tvbrpth" path="res://Scripts/CameraControl.gd" id="4_ypwfr"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vk0hs"]
+albedo_texture = ExtResource("1_5d3a3")
+emission_enabled = true
+emission_texture = ExtResource("2_cultp")
+uv1_offset = Vector3(0.5, 0, 0)
+
+[sub_resource type="SphereMesh" id="SphereMesh_0gk1m"]
+material = SubResource("StandardMaterial3D_vk0hs")
+radius = 5.0
+height = 10.0
+
+[sub_resource type="ORMMaterial3D" id="ORMMaterial3D_vk0hs"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_vk0hs"]
+material = SubResource("ORMMaterial3D_vk0hs")
+size = Vector2(1000, 1000)
+
+[node name="Plane3dPreview" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_0gk1m")
+
+[node name="Plane" parent="MeshInstance3D" instance=ExtResource("3_qs1ay")]
+init_pos = Vector2(0, 1.26)
+
+[node name="Node3D" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="Node3D" node_paths=PackedStringArray("rotator", "raycast")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7546897, 1.3012373, 10)
+script = ExtResource("4_ypwfr")
+rotator = NodePath("../../MeshInstance3D")
+raycast = NodePath("../../RayCast3D")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 0, 32.265335, -10)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -52.912052)
+mesh = SubResource("QuadMesh_vk0hs")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7546897, 1.3012373, 10)
+target_position = Vector3(0, 0, -15)
+collision_mask = 2
+debug_shape_custom_color = Color(1, 0, 0, 1)

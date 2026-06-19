@@ -1,0 +1,53 @@
+extends Camera3D
+class_name CameraControl
+
+signal airport_data_read(data: AirportData)
+signal aircraft_data_read(data: PlaneStateData)
+signal route_data_read(data: FlightData)
+
+@export var rotator: Node3D
+var camera_movement: bool = false
+var planet_pos: Vector2 = Vector2.ZERO
+var step: float = 0.1
+@export var info_display: PlaneDataInfo
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouse:
+		
+		if event.is_action_pressed("Click"):
+			camera_movement = true
+		if event.is_action_released("Click"):
+			camera_movement = false
+		if event.is_action_pressed("zoomin"):
+			global_position.z = clamp(global_position.z-step, 5, 10)
+		if event.is_action_pressed("zoomout"):
+			global_position.z = clamp(global_position.z+step, 5, 10)
+		if event.is_action_pressed("Select"):
+			var from: Vector3 = project_ray_origin(event.position)
+			var to: Vector3 = from + project_ray_normal(event.position)*20
+			var raycast := PhysicsRayQueryParameters3D.new()
+			raycast.from = from
+			raycast.to = to
+			var ray_res := get_world_3d().direct_space_state.intersect_ray(raycast)
+			if not ray_res.is_empty():
+				if ray_res["collider"] is PlaneVis:
+					var data: PlaneStateData = ray_res["collider"].return_data()
+					planet_pos.x = data.flight_data.latitude # Poprawka przez perspektywe
+					planet_pos.y = -data.flight_data.longnitude # Poprawka przez perspektywe
+					info_display.read_aircraft_data(data)
+				elif ray_res["collider"] is Airport:
+					var data: AirportData = ray_res["collider"].return_data()
+					planet_pos.x = data.latitude # Poprawka przez perspektywe
+					planet_pos.y = -data.longnitude # Poprawka przez perspektywe
+					info_display.read_airport_data(data)
+				elif ray_res["collider"] is RoutePoint:
+					var data: FlightData = ray_res["collider"].return_data()
+					info_display.read_route_data(data)
+	if event is InputEventMouseMotion and camera_movement:
+		var velocity: Vector2 = event.velocity
+		planet_pos.x = rotator.rotation_degrees.x + deg_to_rad(velocity.y)
+		planet_pos.y = rotator.rotation_degrees.y + deg_to_rad(velocity.x)
+
+func _physics_process(delta: float) -> void:
+		rotator.rotation_degrees.x = lerp(rotator.rotation_degrees.x, planet_pos.x, delta * 3)
+		rotator.rotation_degrees.y = lerp(rotator.rotation_degrees.y, planet_pos.y, delta * 3)

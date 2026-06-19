@@ -1,0 +1,79 @@
+[gd_scene load_steps=13 format=3 uid="uid://b8sovhieh822b"]
+
+[ext_resource type="Texture2D" uid="uid://rlqadbcu2mt7" path="res://textures/earth/earth albedo.jpg" id="1_5i4i4"]
+[ext_resource type="Script" uid="uid://duhy5baam3sj7" path="res://scripts/visualization/EarthManager.gd" id="1_7l5x3"]
+[ext_resource type="Texture2D" uid="uid://c2n3mt4sg3e6w" path="res://textures/earth/clouds earth.png" id="3_8n4ae"]
+[ext_resource type="Script" uid="uid://dtftd2tvbrpth" path="res://scripts/visualization/CameraControl.gd" id="4_dt1d4"]
+[ext_resource type="Texture2D" uid="uid://c18af6111rje4" path="res://textures/Dark/texture_08.png" id="5_bo8et"]
+[ext_resource type="Script" uid="uid://btpopans5ods7" path="res://scripts/request_handler/LoadData.gd" id="6_7l5x3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vk0hs"]
+albedo_texture = ExtResource("1_5i4i4")
+uv1_offset = Vector3(0.5, 0, 0)
+
+[sub_resource type="SphereMesh" id="SphereMesh_0gk1m"]
+material = SubResource("StandardMaterial3D_vk0hs")
+radius = 5.0
+height = 10.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cultp"]
+transparency = 1
+blend_mode = 1
+albedo_color = Color(1, 1, 1, 0.43137255)
+albedo_texture = ExtResource("3_8n4ae")
+
+[sub_resource type="SphereMesh" id="SphereMesh_qs1ay"]
+material = SubResource("StandardMaterial3D_cultp")
+radius = 5.01
+height = 10.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n5k8l"]
+albedo_texture = ExtResource("5_bo8et")
+uv1_scale = Vector3(10, 10, 10)
+billboard_mode = 1
+
+[sub_resource type="QuadMesh" id="QuadMesh_vk0hs"]
+material = SubResource("StandardMaterial3D_n5k8l")
+size = Vector2(1000, 1000)
+
+[node name="Plane3dPreview" type="Node3D"]
+script = ExtResource("1_7l5x3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_0gk1m")
+
+[node name="Clouds" type="MeshInstance3D" parent="MeshInstance3D"]
+mesh = SubResource("SphereMesh_qs1ay")
+
+[node name="Routes" type="Node3D" parent="MeshInstance3D"]
+
+[node name="Airports" type="Node3D" parent="MeshInstance3D"]
+
+[node name="Planes" type="Node3D" parent="MeshInstance3D"]
+
+[node name="Node3D" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="Node3D" node_paths=PackedStringArray("rotator")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 1.3, 10)
+fov = 40.0
+script = ExtResource("4_dt1d4")
+rotator = NodePath("../../MeshInstance3D")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Node3D/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 1, 0, 32.265335, -10)
+light_energy = 0.7
+light_indirect_energy = 4.607
+light_volumetric_fog_energy = 6.087
+light_specular = 0.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -350.20752)
+mesh = SubResource("QuadMesh_vk0hs")
+
+[node name="Node" type="Node" parent="."]
+script = ExtResource("6_7l5x3")
+mock_data = "res://mockdata/mock1.csv"
+
+[node name="Node2" type="Node" parent="."]
+script = ExtResource("6_7l5x3")
+mock_data = "res://mockdata/mock.csv"

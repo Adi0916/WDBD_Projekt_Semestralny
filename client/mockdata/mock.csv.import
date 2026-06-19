@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cvkrihrc8snpi"
+
+[deps]
+
+files=["res://mockdata/mock.4bccb9.translation", "res://mockdata/mock.lat.translation", "res://mockdata/mock.lon.translation", "res://mockdata/mock.velocity.translation", "res://mockdata/mock.heading.translation", "res://mockdata/mock.vertrate.translation", "res://mockdata/mock.callsign.translation", "res://mockdata/mock.onground.translation", "res://mockdata/mock.alert.translation", "res://mockdata/mock.spi.translation", "res://mockdata/mock.squawk.translation", "res://mockdata/mock.baroaltitude.translation", "res://mockdata/mock.geoaltitude.translation", "res://mockdata/mock.lastposupdate.translation", "res://mockdata/mock.lastcontact.translation"]
+
+source_file="res://mockdata/mock.csv"
+dest_files=["res://mockdata/mock.4bccb9.translation", "res://mockdata/mock.lat.translation", "res://mockdata/mock.lon.translation", "res://mockdata/mock.velocity.translation", "res://mockdata/mock.heading.translation", "res://mockdata/mock.vertrate.translation", "res://mockdata/mock.callsign.translation", "res://mockdata/mock.onground.translation", "res://mockdata/mock.alert.translation", "res://mockdata/mock.spi.translation", "res://mockdata/mock.squawk.translation", "res://mockdata/mock.baroaltitude.translation", "res://mockdata/mock.geoaltitude.translation", "res://mockdata/mock.lastposupdate.translation", "res://mockdata/mock.lastcontact.translation"]
+
+[params]
+
+compress=true
+delimiter=0

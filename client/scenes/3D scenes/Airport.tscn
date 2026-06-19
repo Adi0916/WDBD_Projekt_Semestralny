@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://dbghv7tmatmhl"]
+
+[ext_resource type="Script" uid="uid://cmh85b0fpif7p" path="res://scripts/visualization/Airport.gd" id="1_sl5w0"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_elp50"]
+radius = 0.02
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sl5w0"]
+shading_mode = 0
+albedo_color = Color(0.66214246, 0.7549326, 0.9787578, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_sl5w0"]
+material = SubResource("StandardMaterial3D_sl5w0")
+radius = 0.01
+height = 0.02
+
+[node name="Airport" type="StaticBody3D"]
+script = ExtResource("1_sl5w0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+shape = SubResource("SphereShape3D_elp50")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+mesh = SubResource("SphereMesh_sl5w0")
