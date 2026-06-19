@@ -216,10 +216,10 @@ def link_location_to_flight():
             cur = conn.execute('''
                 UPDATE location
                 SET flight_id = (
-                    SELECT flight_id 
+                    SELECT flight_id
                     FROM flight_data f
-                    WHERE f.aircraft_id = location.aircraft_id 
-                      AND location.time_pos >= f.departure_date_time 
+                    WHERE f.aircraft_id = location.aircraft_id
+                      AND location.time_pos >= f.departure_date_time
                       AND location.time_pos <= f.arrival_date_time
                     LIMIT 1
                 )

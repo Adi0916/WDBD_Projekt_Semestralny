@@ -5,7 +5,6 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-# Import Twoich funkcji (zakładam, że są w pliku data_queries.py)
 from queries import (get_airport_traffic_stats,
                      get_continent_distribution_stats,
                      get_system_health_report,
@@ -24,13 +23,13 @@ class VisualizationWindow(QMainWindow):
         self.update_func = update_func
         self.filter_map = filter_map
         self.defaults = defaults or {}
-        self.checkboxes = {} # Przechowywanie stanów checkboxów
+        self.checkboxes = {}
 
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         layout = QVBoxLayout(main_widget)
 
-        # Sekcja filtrów tekstowych
+
         self.inputs = {}
         grid = QGridLayout()
         for i, (label, param_key) in enumerate(filter_map.items()):
@@ -42,7 +41,6 @@ class VisualizationWindow(QMainWindow):
             self.inputs[param_key] = input_box
         layout.addLayout(grid)
 
-        # Sekcja checkboxów (jeśli przekazano listę)
         if checkboxes:
             cb_layout = QGridLayout()
             for i, cb_name in enumerate(checkboxes):
@@ -54,7 +52,7 @@ class VisualizationWindow(QMainWindow):
 
         self.canvas = ChartCanvas()
         layout.addWidget(self.canvas)
-        # Podpięcie resize_event dla lepszego skalowania
+
         self.canvas.mpl_connect('resize_event', lambda event: self.canvas.draw())
 
         btn = QPushButton(f"Refresh {title}")
@@ -106,7 +104,6 @@ def update_traffic(canvas, f):
     canvas.draw()
 
 def update_distribution(canvas, f):
-    # Pobieramy kontynenty do ukrycia
     hidden = f.get('hidden_continents', [])
     data = get_continent_distribution_stats(exclude_list=hidden)
     canvas.axes.cla()
@@ -136,24 +133,19 @@ def update_health(canvas, f):
 
     time_labels = [str(d).split('T')[1][:8] for d in df['date']]
 
-    # Maksymalna wartość dla skalowania osi
     max_recv = df['recv'].max() if df['recv'].max() > 0 else 100
 
-    # Rysowanie słupków
     bars = canvas.axes.barh(range(len(df)), df['recv'], color='#4a90e2', alpha=0.7)
 
-    # Zmniejszenie marginesów, aby wykres był jak najszerszy
     canvas.figure.subplots_adjust(left=0.15, right=0.95, top=0.9, bottom=0.15)
 
     canvas.axes.set_yticks(range(len(df)))
     canvas.axes.set_yticklabels(time_labels, fontsize=8)
 
-    # Ustalenie limitu osi X - dopasowane do najdłuższego słupka
     canvas.axes.set_xlim(0, max_recv * 1.05)
 
     for i, bar in enumerate(bars):
         status = df.iloc[i]['status']
-        # Tekst wewnątrz słupka, zaczynający się od 2% jego szerokości
         canvas.axes.text(max_recv * 0.02, i, status,
                          va='center', fontsize=7, fontweight='bold', color='black')
 
