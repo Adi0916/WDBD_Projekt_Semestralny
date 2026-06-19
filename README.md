@@ -13,6 +13,7 @@ If you do not have `uv` installed:
 
 * **Linux/macOS:** `curl -LsSf https://astral.sh/uv/install.sh | sh`
 * **Windows:** `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+* Godot engine [https://godotengine.org/download/archive/] version 4.5 
 
 ### 2. Setting up the environment
 
@@ -24,4 +25,5 @@ uv sync
 
 # Run the periodic import scheduler
 uv run scheduler.py
+start exe or run client throught Godot engine with file project.godot in client folder for 3D visualization
 ```
