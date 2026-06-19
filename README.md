@@ -1,7 +1,7 @@
 # OpenSky Network SQL – Semester Project
 
 ## Project Description
-This system is designed for the automatic collection and analysis of real-time air traffic data using the [OpenSky Network API](https://opensky-network.org/apidoc/rest.html). The project implements a complete ETL (Extract, Transform, Load) process – from data extraction through API, data validation and archiving in a relational database, to analytical processing.
+This system is designed for the automatic collection and analysis of real-time air traffic data using the [OpenSky Network API](https://openskynetwork.github.io/opensky-api/rest.html). The project implements a complete ETL (Extract, Transform, Load) process – from data extraction through API, data validation and archiving in a relational database, to analytical processing.
 
 ## Installation and Usage
 
