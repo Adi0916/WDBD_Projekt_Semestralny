@@ -7,10 +7,16 @@ import requests
 import os
 import logging
 
+
+
+
+
+BASE_URL = "https://opensky-network.org/api"
+
+'''
 # Ustaw te zmienne w środowisku (export CLIENT_ID=... itp.)
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-BASE_URL = "https://opensky-network.org/api"
 TOKEN_URL = "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"
 
 def get_access_token():
@@ -39,7 +45,7 @@ def fetch_all_flights(begin_ts, end_ts):
     except Exception as e:
         logging.error(f"Błąd API: {e}")
         return []
-
+'''
 def fetch_states(bbox=None):
 
     url = f"{BASE_URL}/states/all"
@@ -57,7 +63,7 @@ def fetch_states(bbox=None):
 
     return response.json()
 
-'''
+
 def fetch_all_flights(begin_ts, end_ts):
     url = f"{BASE_URL}/flights/all"
     params = {
@@ -71,4 +77,4 @@ def fetch_all_flights(begin_ts, end_ts):
         return []
     response.raise_for_status()
     return response.json()
-'''
+
