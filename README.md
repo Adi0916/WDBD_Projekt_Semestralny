@@ -27,8 +27,7 @@ uv sync
 uv run scheduler.py
 ```
 ### 3. Visualization 3D:
-start exe or run client throught Godot engine with file project.godot in client folder
-to run additional visualization run accordingly:
+Start exe or run client throught Godot engine with file project.godot in client folder. To run additional visualization run accordingly:
 ```bash
 #airport traffic:
 uv run start_airport.py
