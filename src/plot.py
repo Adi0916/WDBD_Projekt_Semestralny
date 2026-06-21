@@ -198,3 +198,4 @@ def create_health_window():
         defaults={"status": ""}
     )
     return win
+
