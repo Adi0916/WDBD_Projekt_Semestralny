@@ -1,0 +1,11 @@
+# Środowisko wirtualne
+src/.venv/
+
+# Pliki tymczasowe Pythona
+src/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bazy danych (jeśli nie chcesz ich wrzucać do repozytorium)
+src/*.db
